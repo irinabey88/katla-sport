@@ -20,6 +20,7 @@ namespace KatlaSport.DataAccess.ProductCatalogue
             Property(i => i.LastUpdated).HasColumnName("updated_utc").IsRequired();
 
             // TODO STEP 1 - Add "Description" property configuration here.
+            Property(i => i.Description).HasColumnName("category_description").HasMaxLength(300);
         }
     }
 }
