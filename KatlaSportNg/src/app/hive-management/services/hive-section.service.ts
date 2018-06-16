@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpParams, HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'environments/environment';
 import { Observable } from 'rxjs';
@@ -22,6 +22,9 @@ export class HiveSectionService {
   }
 
   setHiveSectionStatus(hiveSectionId: number, deletedStatus: boolean): Observable<Object> {
-    return null;
+    const params = new HttpParams().set('hiveSectionId', hiveSectionId.toString());
+    params.set('deletedStatus', deletedStatus.toString());
+
+    return this.http.put(`${this.url}${hiveSectionId}/status/${deletedStatus}`, {params});
   }
 }
