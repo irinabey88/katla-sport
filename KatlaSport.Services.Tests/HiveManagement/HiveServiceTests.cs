@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.Xunit2;
@@ -49,7 +50,8 @@ namespace KatlaSport.Services.Tests.HiveManagement
         [AutoMoqData]
         public async Task Setstatus_NotFound_Entity_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService, int hiveId, bool deletedStatus)
         {
-            context.Setup(c => c.Hives).ReturnsEntitySet(new StoreHive[0]);
+            var listEntity = fixture.CreateMany<StoreHive>(0).ToList();
+            context.Setup(c => c.Hives).ReturnsEntitySet(listEntity);
             var ex = await Assert.ThrowsAsync<RequestedResourceHasConflictException>(() =>
                 hiveService.SetStatusAsync(hiveId, deletedStatus));
 
@@ -58,12 +60,13 @@ namespace KatlaSport.Services.Tests.HiveManagement
 
         [Theory]
         [AutoMoqData]
-        public async Task SetStatus_ValidData_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService, int hiveId, bool deletedStatus)
+        public async Task SetStatus_ValidData_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService, bool deletedStatus)
         {
-            context.Setup(c => c.Hives).ReturnsEntitySet(new List<StoreHive> {new StoreHive {Id = hiveId}});
+            var listEntity = fixture.CreateMany<StoreHive>(13).ToList();
+            context.Setup(c => c.Hives).ReturnsEntitySet(listEntity);
 
-            await hiveService.SetStatusAsync(hiveId, deletedStatus);
-            var hiveAfter = await hiveService.GetHiveAsync(hiveId);
+            await hiveService.SetStatusAsync(listEntity[0].Id, deletedStatus);
+            var hiveAfter = await hiveService.GetHiveAsync(listEntity[0].Id);
 
             Assert.Equal(hiveAfter.IsDeleted, deletedStatus);
         }
@@ -72,7 +75,8 @@ namespace KatlaSport.Services.Tests.HiveManagement
         [AutoMoqData]
         public async Task GetHive_NotFound_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService, int hiveId)
         {
-            context.Setup(c => c.Hives).ReturnsEntitySet(new StoreHive[0]);
+            var listEntity = fixture.CreateMany<StoreHive>(0).ToList();
+            context.Setup(c => c.Hives).ReturnsEntitySet(listEntity);
 
             var ex = await Assert.ThrowsAsync<RequestedResourceNotFoundException>(() => hiveService.GetHiveAsync(hiveId));
 
@@ -81,22 +85,25 @@ namespace KatlaSport.Services.Tests.HiveManagement
 
         [Theory]
         [AutoMoqData]
-        public async Task GetHive_ValidData_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService, int hiveId)
+        public async Task GetHive_ValidData_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService)
         {
+            var listEntity = fixture.CreateMany<StoreHive>(13).ToList();
             context.Setup(c => c.Hives)
-                .ReturnsEntitySet(new List<StoreHive> {new StoreHive {Id = hiveId}, new StoreHive() {Id = hiveId + 1}});
+                .ReturnsEntitySet(listEntity);
 
-            var foundHive = await hiveService.GetHiveAsync(hiveId);
+            var foundHive = await hiveService.GetHiveAsync(listEntity[0].Id);
 
-            Assert.Equal(hiveId, foundHive.Id);
+            Assert.Equal(listEntity[0].Id, foundHive.Id);
         }
 
         [Theory]
         [AutoMoqData]
         public async Task CreateHive_AddedSuccessfuly_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService)
         {
-            context.Setup(x => x.Hives).ReturnsEntitySet(new List<StoreHive>());
-            context.Setup(x => x.Sections).ReturnsEntitySet(new List<StoreHiveSection>());
+            var listEntity = fixture.CreateMany<StoreHive>(13).ToList();
+            var listSectionEntity = fixture.CreateMany<StoreHiveSection>(13).ToList();
+            context.Setup(x => x.Hives).ReturnsEntitySet(listEntity);
+            context.Setup(x => x.Sections).ReturnsEntitySet(listSectionEntity);
             var createRequest = fixture.Create<UpdateHiveRequest>();
             var addedHive = await hiveService.CreateHiveAsync(createRequest);
 
@@ -111,8 +118,9 @@ namespace KatlaSport.Services.Tests.HiveManagement
         [AutoMoqData]
         public async Task CreateHive_ConflictException_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService)
         {
-            var listEntity = new List<StoreHive> {new StoreHive(), new StoreHive(), new StoreHive() };
-            var createRequest = new UpdateHiveRequest();
+            var listEntity = fixture.CreateMany<StoreHive>(13).ToList();
+            var createRequest = fixture.Create<UpdateHiveRequest>();
+            createRequest.Code = listEntity[0].Code;
             context.Setup(x => x.Hives).ReturnsEntitySet(listEntity);
             var ex = await Assert.ThrowsAsync<RequestedResourceHasConflictException>(() => hiveService.CreateHiveAsync(createRequest));
 
@@ -123,14 +131,14 @@ namespace KatlaSport.Services.Tests.HiveManagement
         [AutoMoqData]
         public async Task UpdateHive_UpdateSuccessfuly_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService)
         {
-            var id = fixture.Freeze<int>();
-            context.Setup(x => x.Hives).ReturnsEntitySet(new List<StoreHive> { new StoreHive { Id = id } });
+            var listEntity = fixture.CreateMany<StoreHive>(13).ToList();
+            context.Setup(x => x.Hives).ReturnsEntitySet(listEntity);
             var createRequest = fixture.Create<UpdateHiveRequest>();
-            var addedHive = await hiveService.UpdateHiveAsync(id, createRequest);
+            var addedHive = await hiveService.UpdateHiveAsync(listEntity[0].Id, createRequest);
 
             var hive = await hiveService.GetHiveAsync(addedHive.Id);
 
-            Assert.Equal(hive.Id, id);
+            Assert.Equal(hive.Id, listEntity[0].Id);
             Assert.Equal(hive.Name, createRequest.Name);
             Assert.Equal(hive.Address, createRequest.Address);
             Assert.Equal(hive.Code, createRequest.Code);
@@ -138,25 +146,25 @@ namespace KatlaSport.Services.Tests.HiveManagement
 
         [Theory]
         [AutoMoqData]
-        public async Task UpdateHive_ConflictException_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService)
+        public async Task UpdateHive_ConflictException_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService, int hiveId)
         {
-            var id = fixture.Freeze<int>();
-            var listEntity = new List<StoreHive> { new StoreHive(), new StoreHive(), new StoreHive() };
-            var createRequest = new UpdateHiveRequest();
+            var listEntity = fixture.CreateMany<StoreHive>(13).ToList();
+            var createRequest = fixture.Create<UpdateHiveRequest>();
+            createRequest.Code = listEntity[0].Code;
             context.Setup(x => x.Hives).ReturnsEntitySet(listEntity);
-            var ex = await Assert.ThrowsAsync<RequestedResourceHasConflictException>(() => hiveService.UpdateHiveAsync(id, createRequest));
+            var ex = await Assert.ThrowsAsync<RequestedResourceHasConflictException>(() => hiveService.UpdateHiveAsync(hiveId, createRequest));
 
             Assert.Equal(typeof(RequestedResourceHasConflictException), ex.GetType());
         }
 
         [Theory]
         [AutoMoqData]
-        public async Task UpdateHive_NotFoundException_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService)
+        public async Task UpdateHive_NotFoundException_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService, int hiveId)
         {
-            var id = fixture.Freeze<int>();
-            var createRequest = new UpdateHiveRequest();
-            context.Setup(x => x.Hives).ReturnsEntitySet(new StoreHive[0]);
-            var ex = await Assert.ThrowsAsync<RequestedResourceNotFoundException>(() => hiveService.UpdateHiveAsync(id, createRequest));
+            var listEntity = fixture.CreateMany<StoreHive>(13).ToList();
+            var createRequest = fixture.Create<UpdateHiveRequest>();
+            context.Setup(x => x.Hives).ReturnsEntitySet(listEntity);
+            var ex = await Assert.ThrowsAsync<RequestedResourceNotFoundException>(() => hiveService.UpdateHiveAsync(hiveId, createRequest));
 
             Assert.Equal(typeof(RequestedResourceNotFoundException), ex.GetType());
         }
@@ -165,27 +173,25 @@ namespace KatlaSport.Services.Tests.HiveManagement
         [AutoMoqData]
         public async Task DeleteHive_Successfuly_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService)
         {
-            var id = fixture.Freeze<int>();
-            var listEntity = new List<StoreHive> { new StoreHive{Id = id}, new StoreHive(), new StoreHive() };
-
+            var listEntity = fixture.CreateMany<StoreHive>(13).ToList();
             context.Setup(x => x.Hives).ReturnsEntitySet(listEntity);
             context.Setup(x => x.Sections).ReturnsEntitySet(new List<StoreHiveSection>());
-            await hiveService.SetStatusAsync(id, true);
-            await hiveService.DeleteHiveAsync(id);
+            await hiveService.SetStatusAsync(listEntity[0].Id, true);
+            await hiveService.DeleteHiveAsync(listEntity[0].Id);
 
             var hives = await hiveService.GetHivesAsync();
 
-            Assert.Equal(2, hives.Count);
+            Assert.Equal(12, hives.Count);
         }
 
         [Theory]
         [AutoMoqData]
-        public async Task DeleteHive_NotFoundException_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService)
+        public async Task DeleteHive_NotFoundException_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService, int hiveId)
         {
-            var id = fixture.Freeze<int>();
-            var createRequest = new UpdateHiveRequest();
-            context.Setup(x => x.Hives).ReturnsEntitySet(new StoreHive[0]);
-            var ex = await Assert.ThrowsAsync<RequestedResourceNotFoundException>(() => hiveService.UpdateHiveAsync(id, createRequest));
+            var listEntity = fixture.CreateMany<StoreHive>(13).ToList();
+            var createRequest = fixture.Create<UpdateHiveRequest>();
+            context.Setup(x => x.Hives).ReturnsEntitySet(listEntity);
+            var ex = await Assert.ThrowsAsync<RequestedResourceNotFoundException>(() => hiveService.UpdateHiveAsync(hiveId, createRequest));
 
             Assert.Equal(typeof(RequestedResourceNotFoundException), ex.GetType());
         }
@@ -194,12 +200,11 @@ namespace KatlaSport.Services.Tests.HiveManagement
         [AutoMoqData]
         public async Task DeleteHive_ConflictException_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService)
         {
-            var id = fixture.Freeze<int>();
-            var listEntity = new List<StoreHive> { new StoreHive { Id = id }, new StoreHive(), new StoreHive() };
+            var listEntity = fixture.CreateMany<StoreHive>(13).ToList();
 
             context.Setup(x => x.Hives).ReturnsEntitySet(listEntity);
-            await hiveService.SetStatusAsync(id, false);
-            var ex = await Assert.ThrowsAsync<RequestedResourceHasConflictException>(() => hiveService.DeleteHiveAsync(id));
+            await hiveService.SetStatusAsync(listEntity[0].Id, false);
+            var ex = await Assert.ThrowsAsync<RequestedResourceHasConflictException>(() => hiveService.DeleteHiveAsync(listEntity[0].Id));
 
             Assert.Equal(typeof(RequestedResourceHasConflictException), ex.GetType());
         }
