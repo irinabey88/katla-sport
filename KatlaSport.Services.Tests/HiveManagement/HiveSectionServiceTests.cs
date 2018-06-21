@@ -19,14 +19,47 @@ namespace KatlaSport.Services.Tests.HiveManagement
             Mapper.Reset();
             Mapper.Initialize(config =>
             {
-                config.CreateMap<StoreHive, HiveListItem>();
-                config.CreateMap<StoreHive, Hive>();
-                config.CreateMap<StoreHiveSection, HiveSectionListItem>();
-                config.CreateMap<StoreHiveSection, HiveSection>();
-                config.CreateMap<StoreHive, Hive>();
-                config.CreateMap<UpdateHiveRequest, StoreHive>();
-                config.CreateMap<UpdateHiveSectionRequest, StoreHiveSection>();
+                config.AddProfile<HiveManagementMappingProfile>();
             });
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task GetHiveSections_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveSectionService hiveSectionService)
+        {
+            var listSectionEntity = fixture.CreateMany<StoreHiveSection>(13).ToList();
+            context.Setup(c => c.Sections).ReturnsEntitySet(listSectionEntity);
+
+            var hiveSections = await hiveSectionService.GetHiveSectionsAsync();
+
+            Assert.Equal(13, hiveSections.Count);
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task GetHiveSection_Found_Entity_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveSectionService hiveSectionService)
+        {
+            var listSectionEntity = fixture.CreateMany<StoreHiveSection>(13).ToList();
+            context.Setup(c => c.Sections).ReturnsEntitySet(listSectionEntity);
+
+            var hives = await hiveSectionService.GetHiveSectionAsync(listSectionEntity[0].Id);
+
+            Assert.Equal(listSectionEntity[0].Id, hives.Id);
+            Assert.Equal(listSectionEntity[0].Code, hives.Code);
+            Assert.Equal(listSectionEntity[0].Name, hives.Name);
+            Assert.Equal(listSectionEntity[0].IsDeleted, hives.IsDeleted);
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task GetHiveSection_Not_Found_Entity_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveSectionService hiveSectionService, int hiveSectionId)
+        {
+            var listSectionEntity = fixture.CreateMany<StoreHiveSection>(13).ToList();
+            context.Setup(c => c.Sections).ReturnsEntitySet(listSectionEntity);
+
+            var ex = await Assert.ThrowsAsync<RequestedResourceNotFoundException>(() => hiveSectionService.GetHiveSectionAsync(hiveSectionId));
+
+            Assert.Equal(typeof(RequestedResourceNotFoundException), ex.GetType());
         }
 
         [Theory]
