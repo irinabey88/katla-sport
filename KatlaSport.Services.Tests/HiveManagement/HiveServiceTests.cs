@@ -75,18 +75,6 @@ namespace KatlaSport.Services.Tests.HiveManagement
 
         [Theory]
         [AutoMoqData]
-        public async Task GetHive_Not_Found_Entity_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService, int hiveId)
-        {
-            var listEntity = fixture.CreateMany<StoreHive>(13).ToList();
-            context.Setup(c => c.Hives).ReturnsEntitySet(listEntity);
-
-            var ex = await Assert.ThrowsAsync<RequestedResourceNotFoundException>( () => hiveService.GetHiveAsync(hiveId));
-
-            Assert.Equal(typeof(RequestedResourceNotFoundException),ex.GetType());
-        }
-
-        [Theory]
-        [AutoMoqData]
         public async Task Setstatus_HasConflictException_Entity_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService, int hiveId, bool deletedStatus)
         {
             var listEntity = fixture.CreateMany<StoreHive>(0).ToList();

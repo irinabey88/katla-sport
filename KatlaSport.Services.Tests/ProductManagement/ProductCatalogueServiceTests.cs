@@ -5,16 +5,15 @@ using AutoFixture;
 using AutoFixture.Xunit2;
 using AutoMapper;
 using KatlaSport.DataAccess.ProductCatalogue;
-using KatlaSport.Services.HiveManagement;
 using KatlaSport.Services.ProductManagement;
 using Moq;
 using Xunit;
 
 namespace KatlaSport.Services.Tests.ProductManagement
 {
-    public class ProductCategoryTests
+    public class ProductCatalogueServiceTests
     {
-        public ProductCategoryTests()
+        public ProductCatalogueServiceTests()
         {
             Mapper.Reset();
             Mapper.Initialize(config =>
@@ -25,7 +24,7 @@ namespace KatlaSport.Services.Tests.ProductManagement
 
         [Theory]
         [AutoMoqData]
-        public void Create_ProductCategory_WithNull_FirstParameter_Test([Frozen] IMock<IUserContext> userContext)
+        public void Create_ProductCatalog_WithNull_FirstParameter_Test([Frozen] IMock<IUserContext> userContext)
         {
             var ex = Assert.Throws<ArgumentNullException>(() => new ProductCatalogueService(null, userContext.Object));
 
@@ -34,7 +33,7 @@ namespace KatlaSport.Services.Tests.ProductManagement
 
         [Theory]
         [AutoMoqData]
-        public void Create_ProductCategory_WithNull_SecondParameter_Test([Frozen] IMock<IProductCatalogueContext> context)
+        public void Create_ProductCatalog_WithNull_SecondParameter_Test([Frozen] IMock<IProductCatalogueContext> context)
         {
             var ex = Assert.Throws<ArgumentNullException>(() => new ProductCatalogueService(context.Object, null));
 
@@ -72,7 +71,7 @@ namespace KatlaSport.Services.Tests.ProductManagement
 
         [Theory]
         [AutoMoqData]
-        public async Task GetProduct_Found_Entity_Test_Not_Found_Entity_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService, int productCatalogId)
+        public async Task GetProduct_NotFound_Entity_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService, int productCatalogId)
         {
             var listEntity = fixture.CreateMany<CatalogueProduct>(13).ToList();
             context.Setup(c => c.Products).ReturnsEntitySet(listEntity);
@@ -110,19 +109,7 @@ namespace KatlaSport.Services.Tests.ProductManagement
 
         [Theory]
         [AutoMoqData]
-        public async Task GetHive_NotFound_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService, int productCatalogId)
-        {
-            var listEntity = fixture.CreateMany<CatalogueProduct>(0).ToList();
-            context.Setup(c => c.Products).ReturnsEntitySet(listEntity);
-
-            var ex = await Assert.ThrowsAsync<RequestedResourceNotFoundException>(() => productCatalogueService.GetProductAsync(productCatalogId));
-
-            Assert.Equal(typeof(RequestedResourceNotFoundException), ex.GetType());
-        }
-
-        [Theory]
-        [AutoMoqData]
-        public async Task GetHive_ValidData_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService)
+        public async Task GetProduct_ValidData_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService)
         {
             var listEntity = fixture.CreateMany<CatalogueProduct>(13).ToList();
             context.Setup(c => c.Products)
@@ -135,7 +122,7 @@ namespace KatlaSport.Services.Tests.ProductManagement
 
         [Theory]
         [AutoMoqData]
-        public async Task CreateHive_AddedSuccessfuly_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService)
+        public async Task CreateProduct_AddedSuccessfuly_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService)
         {
             var listEntity = fixture.CreateMany<CatalogueProduct>(13).ToList();
             context.Setup(x => x.Products).ReturnsEntitySet(listEntity);
@@ -152,7 +139,7 @@ namespace KatlaSport.Services.Tests.ProductManagement
 
         [Theory]
         [AutoMoqData]
-        public async Task CreateHive_ConflictException_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService)
+        public async Task CreateProduct_ConflictException_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService)
         {
             var listEntity = fixture.CreateMany<CatalogueProduct>(13).ToList();
             var createRequest = fixture.Create<UpdateProductRequest>();
@@ -165,7 +152,7 @@ namespace KatlaSport.Services.Tests.ProductManagement
 
         [Theory]
         [AutoMoqData]
-        public async Task UpdateHive_UpdateSuccessfuly_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService)
+        public async Task UpdateProduct_UpdateSuccessfuly_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService)
         {
             var listEntity = fixture.CreateMany<CatalogueProduct>(13).ToList();
             context.Setup(x => x.Products).ReturnsEntitySet(listEntity);
@@ -182,7 +169,7 @@ namespace KatlaSport.Services.Tests.ProductManagement
 
         [Theory]
         [AutoMoqData]
-        public async Task UpdateHive_ConflictException_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService, int productCatalogId)
+        public async Task UpdateProduct_ConflictException_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService, int productCatalogId)
         {
             var listEntity = fixture.CreateMany<CatalogueProduct>(13).ToList();
             var createRequest = fixture.Create<UpdateProductRequest>();
@@ -195,7 +182,7 @@ namespace KatlaSport.Services.Tests.ProductManagement
 
         [Theory]
         [AutoMoqData]
-        public async Task UpdateHive_NotFoundException_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService, int productCatalogId)
+        public async Task UpdateProduct_NotFoundException_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService, int productCatalogId)
         {
             var listEntity = fixture.CreateMany<CatalogueProduct>(13).ToList();
             var createRequest = fixture.Create<UpdateProductRequest>();
@@ -207,7 +194,7 @@ namespace KatlaSport.Services.Tests.ProductManagement
 
         [Theory]
         [AutoMoqData]
-        public async Task DeleteHive_Successfuly_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService)
+        public async Task DeleteProduct_Successfuly_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService)
         {
             var listEntity = fixture.CreateMany<CatalogueProduct>(13).ToList();
             context.Setup(x => x.Products).ReturnsEntitySet(listEntity);
@@ -215,14 +202,14 @@ namespace KatlaSport.Services.Tests.ProductManagement
             await productCatalogueService.SetStatusAsync(listEntity[0].Id, true);
             await productCatalogueService.DeleteProductAsync(listEntity[0].Id);
 
-            var hives = await productCatalogueService.GetProductsAsync(0, 12);
+            var products = await productCatalogueService.GetProductsAsync(0, 12);
 
-            Assert.Equal(12, hives.Count);
+            Assert.Equal(12, products.Count);
         }
 
         [Theory]
         [AutoMoqData]
-        public async Task DeleteHive_NotFoundException_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService, int productCatalogId)
+        public async Task DeleteProduct_NotFoundException_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService, int productCatalogId)
         {
             var listEntity = fixture.CreateMany<CatalogueProduct>(13).ToList();
             var createRequest = fixture.Create<UpdateProductRequest>();
@@ -234,7 +221,7 @@ namespace KatlaSport.Services.Tests.ProductManagement
 
         [Theory]
         [AutoMoqData]
-        public async Task DeleteHive_ConflictException_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService)
+        public async Task DeleteProduct_ConflictException_Test([Frozen] Mock<IProductCatalogueContext> context, IFixture fixture, ProductCatalogueService productCatalogueService)
         {
             var listEntity = fixture.CreateMany<CatalogueProduct>(13).ToList();
 

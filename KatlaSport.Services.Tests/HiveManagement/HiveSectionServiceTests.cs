@@ -52,18 +52,6 @@ namespace KatlaSport.Services.Tests.HiveManagement
 
         [Theory]
         [AutoMoqData]
-        public async Task GetHiveSection_Not_Found_Entity_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveSectionService hiveSectionService, int hiveSectionId)
-        {
-            var listSectionEntity = fixture.CreateMany<StoreHiveSection>(13).ToList();
-            context.Setup(c => c.Sections).ReturnsEntitySet(listSectionEntity);
-
-            var ex = await Assert.ThrowsAsync<RequestedResourceNotFoundException>(() => hiveSectionService.GetHiveSectionAsync(hiveSectionId));
-
-            Assert.Equal(typeof(RequestedResourceNotFoundException), ex.GetType());
-        }
-
-        [Theory]
-        [AutoMoqData]
         public void Create_HiveSectionService_WithNull_FirstParameter_Test([Frozen] IMock<IUserContext> userContext)
         {
             var ex = Assert.Throws<ArgumentNullException>(() => new HiveSectionService(null, userContext.Object));
