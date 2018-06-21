@@ -87,7 +87,7 @@ namespace KatlaSport.Services.Tests.HiveManagement
 
         [Theory]
         [AutoMoqData]
-        public async Task Setstatus_NotFound_Entity_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService, int hiveId, bool deletedStatus)
+        public async Task Setstatus_HasConflictException_Entity_Test([Frozen] Mock<IProductStoreHiveContext> context, IFixture fixture, HiveService hiveService, int hiveId, bool deletedStatus)
         {
             var listEntity = fixture.CreateMany<StoreHive>(0).ToList();
             context.Setup(c => c.Hives).ReturnsEntitySet(listEntity);
