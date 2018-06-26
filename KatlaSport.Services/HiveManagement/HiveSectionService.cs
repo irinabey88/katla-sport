@@ -71,7 +71,7 @@ namespace KatlaSport.Services.HiveManagement
                 dbHiveSection.IsDeleted = deletedStatus;
                 dbHiveSection.LastUpdated = DateTime.UtcNow;
                 dbHiveSection.LastUpdatedBy = _userContext.UserId;
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -96,7 +96,7 @@ namespace KatlaSport.Services.HiveManagement
             dbHiveSection.LastUpdatedBy = _userContext.UserId;
             _context.Sections.Add(dbHiveSection);
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return Mapper.Map<HiveSection>(dbHiveSection);
         }
@@ -122,7 +122,7 @@ namespace KatlaSport.Services.HiveManagement
             dbHiveSection.LastUpdatedBy = _userContext.UserId;
             dbHiveSection.LastUpdated = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return Mapper.Map<HiveSection>(dbHiveSection);
         }
@@ -143,7 +143,7 @@ namespace KatlaSport.Services.HiveManagement
             }
 
             _context.Sections.Remove(dbHiveSection);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }
