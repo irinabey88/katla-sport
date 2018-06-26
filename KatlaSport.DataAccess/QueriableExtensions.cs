@@ -25,10 +25,6 @@ namespace KatlaSport.DataAccess
             {
                 source = (source as EntitySet<T>).DbSet;
             }
-            else
-            {
-                return Task.Run(() => source.ToArray());
-            }
 
             return Extensions.ToArrayAsync(source);
         }
