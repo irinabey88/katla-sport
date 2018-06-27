@@ -32,7 +32,7 @@ namespace KatlaSport.WebApi.Controllers
         [HttpGet]
         [Route("")]
         [SwaggerResponse(HttpStatusCode.OK, Description = "Returns a list of hives.", Type = typeof(HiveListItem[]))]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        [SwaggerResponse(HttpStatusCode.InternalServerError, Description = "Internal server error.", Type = typeof(string))]
         public async Task<IHttpActionResult> GetHives()
         {
             try
@@ -49,8 +49,9 @@ namespace KatlaSport.WebApi.Controllers
         [HttpGet]
         [Route("{hiveId:int:min(1)}")]
         [SwaggerResponse(HttpStatusCode.OK, Description = "Returns a hive.", Type = typeof(Hive))]
-        [SwaggerResponse(HttpStatusCode.NotFound)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        [SwaggerResponse(HttpStatusCode.BadRequest, Description = "Invalid input data", Type = typeof(string))]
+        [SwaggerResponse(HttpStatusCode.NotFound, Description = "Hive with hiveId isn't found" , Type = typeof(string))]
+        [SwaggerResponse(HttpStatusCode.InternalServerError, Description = "Internal server error.", Type = typeof(string))]
         public async Task<IHttpActionResult> GetHive(int hiveId)
         {
             if (hiveId < 1)
@@ -72,8 +73,9 @@ namespace KatlaSport.WebApi.Controllers
         [HttpGet]
         [Route("{hiveId:int:min(1)}/sections")]
         [SwaggerResponse(HttpStatusCode.OK, Description = "Returns a list of hive sections for specified hive.", Type = typeof(HiveSectionListItem))]
-        [SwaggerResponse(HttpStatusCode.NotFound)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        [SwaggerResponse(HttpStatusCode.BadRequest, Description = "Invalid input data", Type = typeof(string))]
+        [SwaggerResponse(HttpStatusCode.NotFound, Description = "Hive with hiveId isn't found", Type = typeof(string))]
+        [SwaggerResponse(HttpStatusCode.InternalServerError, Description = "Internal server error.", Type = typeof(string))]
         public async Task<IHttpActionResult> GetHiveSections(int hiveId)
         {
             if (hiveId < 1)
@@ -99,8 +101,9 @@ namespace KatlaSport.WebApi.Controllers
         [HttpPut]
         [Route("{hiveId:int:min(1)}/status/{deletedStatus:bool}")]
         [SwaggerResponse(HttpStatusCode.NoContent, Description = "Sets deleted status for an existed hive.")]
-        [SwaggerResponse(HttpStatusCode.NotFound)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        [SwaggerResponse(HttpStatusCode.BadRequest, Description = "Invalid input data", Type = typeof(string))]
+        [SwaggerResponse(HttpStatusCode.NotFound, Description = "Hive with hiveId isn't found", Type = typeof(string))]
+        [SwaggerResponse(HttpStatusCode.InternalServerError, Description = "Internal server error.", Type = typeof(string))]
         public async Task<IHttpActionResult> SetStatus([FromUri] int hiveId, [FromUri] bool deletedStatus)
         {
             if (hiveId < 1)
@@ -119,16 +122,16 @@ namespace KatlaSport.WebApi.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest();
+                return InternalServerError();
             }
         }
 
         [HttpPost]
         [Route("")]
         [SwaggerResponse(HttpStatusCode.Created, Description = "Creates a new hive.")]
-        [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [SwaggerResponse(HttpStatusCode.Conflict)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        [SwaggerResponse(HttpStatusCode.BadRequest, Description = "Invalid input data", Type = typeof(string))]
+        [SwaggerResponse(HttpStatusCode.Conflict, Description = "Incorrect input data. Hive with such code already exists", Type = typeof(string))]
+        [SwaggerResponse(HttpStatusCode.InternalServerError, Description = "Internal server error.", Type = typeof(string))]
         public async Task<IHttpActionResult> AddHive([FromBody] UpdateHiveRequest createRequest)
         {
             if (createRequest == null)
@@ -159,10 +162,10 @@ namespace KatlaSport.WebApi.Controllers
         [HttpPut]
         [Route("{hiveId:int:min(1)}")]
         [SwaggerResponse(HttpStatusCode.NoContent, Description = "Updates an existed hive.")]
-        [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [SwaggerResponse(HttpStatusCode.Conflict)]
-        [SwaggerResponse(HttpStatusCode.NotFound)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        [SwaggerResponse(HttpStatusCode.BadRequest, Description = "Invalid input data", Type = typeof(string))]
+        [SwaggerResponse(HttpStatusCode.Conflict, Description = "Incorrect input data. Hive with such code already exists", Type = typeof(string))]
+        [SwaggerResponse(HttpStatusCode.NotFound, Description = "Hive with hiveId isn't found", Type = typeof(string))]
+        [SwaggerResponse(HttpStatusCode.InternalServerError, Description = "Internal server error.", Type = typeof(string))]
         public async Task<IHttpActionResult> UpdateHive([FromUri] int hiveId, [FromBody] UpdateHiveRequest updateRequest)
         {
             if (!ModelState.IsValid)
@@ -196,10 +199,10 @@ namespace KatlaSport.WebApi.Controllers
         [HttpDelete]
         [Route("{hiveId:int:min(1)}")]
         [SwaggerResponse(HttpStatusCode.NoContent, Description = "Deletes an existed hive.")]
-        [SwaggerResponse(HttpStatusCode.BadRequest)]
-        [SwaggerResponse(HttpStatusCode.Conflict)]
-        [SwaggerResponse(HttpStatusCode.NotFound)]
-        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        [SwaggerResponse(HttpStatusCode.BadRequest, Description = "Invalid input data", Type = typeof(string))]
+        [SwaggerResponse(HttpStatusCode.Conflict, Description = "Incorrect input data. Hive with such code already exists", Type = typeof(string))]
+        [SwaggerResponse(HttpStatusCode.NotFound, Description = "Hive with hiveId isn't found", Type = typeof(string))]
+        [SwaggerResponse(HttpStatusCode.InternalServerError, Description = "Internal server error.", Type = typeof(string))]
         public async Task<IHttpActionResult> DeleteHive([FromUri] int hiveId)
         {
             if (hiveId < 1)

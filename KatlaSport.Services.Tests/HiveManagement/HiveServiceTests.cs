@@ -16,11 +16,7 @@ namespace KatlaSport.Services.Tests.HiveManagement
     {
         public HiveServiceTests()
         {
-            Mapper.Reset();
-            Mapper.Initialize(config =>
-            {
-                config.AddProfile<HiveManagementMappingProfile>();
-            });
+            var mapper = MapperInitializer.Instance;
         }
 
         [Theory]
