@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.Xunit2;
-using AutoMapper;
 using KatlaSport.DataAccess.ProductCatalogue;
 using KatlaSport.Services.ProductManagement;
 using Moq;
@@ -17,11 +16,7 @@ namespace KatlaSport.Services.Tests.ProductManagement
 
         public ProductCategoryServiceTests()
         {
-            Mapper.Reset();
-            Mapper.Initialize(config =>
-            {
-                config.AddProfile<ProductManagementMappingProfile>();
-            });
+            var mapper = MapperInitializer.Instance;
         }
 
         [Theory]
